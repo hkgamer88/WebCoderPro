@@ -3,6 +3,10 @@ package com.webcoderpro
 import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Bundle
+import android.text.Editable
+import android.text.Spannable
+import android.text.TextWatcher
+import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -11,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.regex.Pattern
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -26,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     private val fileNames = mutableListOf<String>()
 
     private var isDark = false
+    private var isHighlighting = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +58,18 @@ class MainActivity : AppCompatActivity() {
         if (fileNames.isNotEmpty()) {
             openFile(File(projectDir, fileNames[0]))
         }
+
+        // Syntax highlighting watcher
+        editor.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (isHighlighting || s == null) return
+                isHighlighting = true
+                applySyntaxHighlight(s)
+                isHighlighting = false
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
 
         btnEditor.setOnClickListener {
             editor.visibility = View.VISIBLE
@@ -94,6 +112,34 @@ class MainActivity : AppCompatActivity() {
         applyEditorTheme()
     }
 
+    // ================= SYNTAX HIGHLIGHT =================
+
+    private fun applySyntaxHighlight(editable: Editable) {
+        editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
+            .forEach { editable.removeSpan(it) }
+
+        val text = editable.toString()
+
+        highlight("<[^>]+>", text, editable, Color.parseColor("#4CAF50"))       // HTML tags
+        highlight("\\b(id|class|src|href|style)\\b", text, editable, Color.parseColor("#03A9F4"))
+        highlight("\"[^\"]*\"", text, editable, Color.parseColor("#FFC107"))    // Strings
+        highlight("<!--(.|\\n)*?-->", text, editable, Color.GRAY)               // Comments
+        highlight("\\b(function|var|let|const|if|else|return)\\b",
+            text, editable, Color.parseColor("#E91E63"))                        // JS keywords
+    }
+
+    private fun highlight(regex: String, text: String, editable: Editable, color: Int) {
+        val matcher = Pattern.compile(regex).matcher(text)
+        while (matcher.find()) {
+            editable.setSpan(
+                ForegroundColorSpan(color),
+                matcher.start(),
+                matcher.end(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+    }
+
     // ================= ZIP EXPORT =================
 
     private fun exportProjectAsZip() {
@@ -107,7 +153,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         zipOut.close()
-        Toast.makeText(this, "ZIP saved: ${zipFile.name}", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "ZIP created", Toast.LENGTH_SHORT).show()
     }
 
     // ================= FILE SYSTEM =================
@@ -228,7 +274,7 @@ class MainActivity : AppCompatActivity() {
     private fun defaultHtml(): String {
         return """
             <h1>WebCoderPro 🚀</h1>
-            <p>Export project as ZIP</p>
+            <p>Syntax highlighting enabled</p>
         """.trimIndent()
     }
 }
