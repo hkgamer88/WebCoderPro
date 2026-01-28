@@ -1,3 +1,9 @@
+import android.text.Editable
+import android.text.Spannable
+import android.text.TextWatcher
+import android.text.style.ForegroundColorSpan
+import android.graphics.Color
+import java.util.regex.Pattern
 import android.widget.Toast
 import java.io.FileInputStream
 import java.io.FileOutputStream
