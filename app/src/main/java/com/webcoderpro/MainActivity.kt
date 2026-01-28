@@ -1,6 +1,7 @@
 package com.webcoderpro
 
 import android.app.AlertDialog
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.webkit.WebView
@@ -19,6 +20,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var projectDir: File
     private var currentFile: File? = null
     private val fileNames = mutableListOf<String>()
+
+    private var isDark = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +60,7 @@ class MainActivity : AppCompatActivity() {
             webView.visibility = View.VISIBLE
             webView.loadDataWithBaseURL(
                 null,
-                editor.text.toString(),
+                wrapWithTheme(editor.text.toString()),
                 "text/html",
                 "UTF-8",
                 null
@@ -72,12 +75,50 @@ class MainActivity : AppCompatActivity() {
             openFile(File(projectDir, fileNames[pos]))
         }
 
-        // 🔥 Long press = Rename / Delete
         fileList.setOnItemLongClickListener { _, _, pos, _ ->
             val file = File(projectDir, fileNames[pos])
             showFileOptions(file)
             true
         }
+
+        // Long press editor → toggle dark mode
+        editor.setOnLongClickListener {
+            isDark = !isDark
+            applyEditorTheme()
+            Toast.makeText(this, if (isDark) "Dark Mode" else "Light Mode", Toast.LENGTH_SHORT).show()
+            true
+        }
+
+        applyEditorTheme()
+    }
+
+    private fun applyEditorTheme() {
+        if (isDark) {
+            editor.setBackgroundColor(Color.parseColor("#121212"))
+            editor.setTextColor(Color.WHITE)
+            editor.setHintTextColor(Color.LTGRAY)
+        } else {
+            editor.setBackgroundColor(Color.WHITE)
+            editor.setTextColor(Color.BLACK)
+            editor.setHintTextColor(Color.DKGRAY)
+        }
+    }
+
+    private fun wrapWithTheme(html: String): String {
+        val bg = if (isDark) "#121212" else "#FFFFFF"
+        val fg = if (isDark) "#FFFFFF" else "#000000"
+        return """
+            <html>
+            <head>
+                <style>
+                    body { background:$bg; color:$fg; padding:16px; }
+                </style>
+            </head>
+            <body>
+                $html
+            </body>
+            </html>
+        """.trimIndent()
     }
 
     private fun loadFiles() {
@@ -123,10 +164,6 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    // =========================
-    // Rename / Delete logic
-    // =========================
-
     private fun showFileOptions(file: File) {
         val options = arrayOf("Rename", "Delete")
 
@@ -146,48 +183,34 @@ class MainActivity : AppCompatActivity() {
         input.setText(file.name)
 
         AlertDialog.Builder(this)
-            .setTitle("Rename File")
+            .setTitle("Rename")
             .setView(input)
-            .setPositiveButton("Rename") { _, _ ->
-                val newName = input.text.toString()
-                if (newName.isNotEmpty()) {
-                    val newFile = File(projectDir, newName)
-                    file.renameTo(newFile)
-                    loadFiles()
-                    adapter.notifyDataSetChanged()
-                    openFile(newFile)
-                }
+            .setPositiveButton("OK") { _, _ ->
+                val newFile = File(projectDir, input.text.toString())
+                file.renameTo(newFile)
+                loadFiles()
+                adapter.notifyDataSetChanged()
+                openFile(newFile)
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
 
     private fun deleteFile(file: File) {
-        AlertDialog.Builder(this)
-            .setTitle("Delete")
-            .setMessage("Delete ${file.name}?")
-            .setPositiveButton("Delete") { _, _ ->
-                file.delete()
-                loadFiles()
-                adapter.notifyDataSetChanged()
-                if (fileNames.isNotEmpty()) {
-                    openFile(File(projectDir, fileNames[0]))
-                } else {
-                    editor.setText("")
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+        file.delete()
+        loadFiles()
+        adapter.notifyDataSetChanged()
+        if (fileNames.isNotEmpty()) {
+            openFile(File(projectDir, fileNames[0]))
+        } else {
+            editor.setText("")
+        }
     }
 
     private fun defaultHtml(): String {
         return """
-            <html>
-            <body>
-                <h1>WebCoderPro 🚀</h1>
-                <p>Edit multiple files</p>
-            </body>
-            </html>
+            <h1>WebCoderPro 🚀</h1>
+            <p>Dark mode ready</p>
         """.trimIndent()
     }
 }
