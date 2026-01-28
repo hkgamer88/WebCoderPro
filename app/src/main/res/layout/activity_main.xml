@@ -2,68 +2,84 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FAFAFA">
 
-    <!-- Toolbar -->
+    <!-- Top App Bar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#212121"
+        android:layout_height="56dp"
+        android:background="#1F1F1F"
         android:title="WebCoderPro"
         android:titleTextColor="#FFFFFF"
-        android:padding="8dp" />
+        android:contentInsetStartWithNavigation="0dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp" />
 
     <!-- Project Selector -->
     <Spinner
         android:id="@+id/projectSpinner"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:padding="8dp" />
 
-    <!-- Tabs -->
+    <!-- Action Row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="4dp">
 
-        <Button
+        <ImageButton
             android:id="@+id/tabEditor"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
-            android:text="Editor" />
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_menu_edit"
+            android:contentDescription="Editor" />
 
-        <Button
+        <ImageButton
             android:id="@+id/tabPreview"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
-            android:text="Preview" />
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_menu_view"
+            android:contentDescription="Preview" />
 
-        <Button
+        <ImageButton
             android:id="@+id/btnDark"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🌙" />
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_menu_day"
+            android:contentDescription="Dark Mode" />
 
-        <Button
+        <ImageButton
             android:id="@+id/btnExport"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="⬇️" />
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_menu_save"
+            android:contentDescription="Export ZIP" />
     </LinearLayout>
 
-    <!-- File List -->
+    <!-- Files -->
     <ListView
         android:id="@+id/fileList"
         android:layout_width="match_parent"
-        android:layout_height="120dp" />
+        android:layout_height="120dp"
+        android:divider="#E0E0E0"
+        android:dividerHeight="1dp" />
 
     <Button
         android:id="@+id/btnNewFile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="➕ New HTML File" />
+        android:text="New HTML File"
+        android:layout_margin="6dp" />
 
     <!-- Editor -->
     <EditText
@@ -72,9 +88,11 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="top"
-        android:hint="Write HTML / CSS / JS here"
+        android:hint="Write HTML / CSS / JS"
         android:inputType="textMultiLine"
-        android:padding="8dp" />
+        android:padding="12dp"
+        android:background="#FFFFFF"
+        android:textColor="#212121" />
 
     <!-- Preview -->
     <WebView
