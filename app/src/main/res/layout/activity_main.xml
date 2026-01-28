@@ -1,42 +1,81 @@
-<ListView
-    android:id="@+id/fileList"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="120dp" />
+    android:layout_height="match_parent">
 
-<Button
-    android:id="@+id/btnNewFile"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="➕ New HTML File" />
-<!-- Tabs + Dark Mode -->
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
-    
-    <Button
-    android:id="@+id/btnExport"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="⬇️ ZIP" />
-    
-    <Button
-        android:id="@+id/tabEditor"
-        android:layout_width="0dp"
+    <!-- Top Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#212121"
+        android:title="WebCoderPro"
+        android:titleTextColor="#FFFFFF"
+        android:padding="8dp" />
+
+    <!-- Tabs + Actions -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/tabEditor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Editor" />
+
+        <Button
+            android:id="@+id/tabPreview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Preview" />
+
+        <Button
+            android:id="@+id/btnDark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🌙" />
+
+        <Button
+            android:id="@+id/btnExport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⬇️" />
+    </LinearLayout>
+
+    <!-- File List -->
+    <ListView
+        android:id="@+id/fileList"
+        android:layout_width="match_parent"
+        android:layout_height="120dp" />
+
+    <Button
+        android:id="@+id/btnNewFile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="➕ New HTML File" />
+
+    <!-- Editor -->
+    <EditText
+        android:id="@+id/htmlEditor"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
-        android:text="Editor" />
+        android:gravity="top"
+        android:hint="Write HTML / CSS / JS here"
+        android:inputType="textMultiLine"
+        android:padding="8dp" />
 
-    <Button
-        android:id="@+id/tabPreview"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+    <!-- Preview -->
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
-        android:text="Preview" />
+        android:visibility="gone" />
 
-    <Button
-        android:id="@+id/btnDark"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="🌙" />
 </LinearLayout>
