@@ -1,4 +1,7 @@
-import android.graphics.Color
+import android.app.AlertDialog
+import android.widget.ArrayAdapter
+import java.io.File
+importt android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.webkit.WebView
@@ -8,13 +11,62 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
-
+private lateinit var filesDirPath: File
+private lateinit var fileAdapter: ArrayAdapter<String>
+private val fileNames = mutableListOf<String>()
+private var currentFile: File? = null
     private var isDark = false
+private fun loadFiles() {
+    fileNames.clear()
+    filesDirPath.listFiles()?.forEach {
+        fileNames.add(it.name)
+    }
+}
 
+private fun createNewFileDialog() {
+    val input = EditText(this)
+    input.hint = "index.html"
+
+    AlertDialog.Builder(this)
+        .setTitle("New HTML File")
+        .setView(input)
+        .setPositiveButton("Create") { _, _ ->
+            val name = input.text.toString()
+            if (name.isNotEmpty()) {
+                val file = File(filesDirPath, name)
+                file.writeText("<html><body><h1>$name</h1></body></html>")
+                currentFile = file
+                loadFiles()
+                fileAdapter.notifyDataSetChanged()
+                htmlEditor.setText(file.readText())
+            }
+        }
+        .setNegativeButton("Cancel", null)
+        .show()
+}
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+filesDirPath = File(filesDir, "projects")
+if (!filesDirPath.exists()) filesDirPath.mkdir()
 
+val fileList = findViewById<ListView>(R.id.fileList)
+val newFileBtn = findViewById<Button>(R.id.btnNewFile)
+
+loadFiles()
+
+fileAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, fileNames)
+fileList.adapter = fileAdapter
+
+fileList.setOnItemClickListener { _, _, position, _ ->
+    val file = File(filesDirPath, fileNames[position])
+    currentFile = file
+    htmlEditor.setText(file.readText())
+}
+
+newFileBtn.setOnClickListener {
+    createNewFileDialog()
+}
         val editorTab = findViewById<Button>(R.id.tabEditor)
         val previewTab = findViewById<Button>(R.id.tabPreview)
         val darkBtn = findViewById<Button>(R.id.btnDark)
@@ -47,7 +99,7 @@ class MainActivity : AppCompatActivity() {
             webView.visibility = View.GONE
         }
 
-        previewTab.setOnClickListener {
+        previewTab.setOnClickListener {currentFile?.writeText(htmlEditor.text.toString())}
             htmlEditor.visibility = View.GONE
             webView.visibility = View.VISIBLE
             webView.loadDataWithBaseURL(
