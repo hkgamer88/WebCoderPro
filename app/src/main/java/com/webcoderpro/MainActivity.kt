@@ -39,7 +39,6 @@ class MainActivity : AppCompatActivity() {
         if (!projectDir.exists()) projectDir.mkdir()
 
         loadFiles()
-
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, fileNames)
         fileList.adapter = adapter
 
@@ -71,6 +70,13 @@ class MainActivity : AppCompatActivity() {
 
         fileList.setOnItemClickListener { _, _, pos, _ ->
             openFile(File(projectDir, fileNames[pos]))
+        }
+
+        // 🔥 Long press = Rename / Delete
+        fileList.setOnItemLongClickListener { _, _, pos, _ ->
+            val file = File(projectDir, fileNames[pos])
+            showFileOptions(file)
+            true
         }
     }
 
@@ -117,12 +123,69 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    // =========================
+    // Rename / Delete logic
+    // =========================
+
+    private fun showFileOptions(file: File) {
+        val options = arrayOf("Rename", "Delete")
+
+        AlertDialog.Builder(this)
+            .setTitle(file.name)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> renameFileDialog(file)
+                    1 -> deleteFile(file)
+                }
+            }
+            .show()
+    }
+
+    private fun renameFileDialog(file: File) {
+        val input = EditText(this)
+        input.setText(file.name)
+
+        AlertDialog.Builder(this)
+            .setTitle("Rename File")
+            .setView(input)
+            .setPositiveButton("Rename") { _, _ ->
+                val newName = input.text.toString()
+                if (newName.isNotEmpty()) {
+                    val newFile = File(projectDir, newName)
+                    file.renameTo(newFile)
+                    loadFiles()
+                    adapter.notifyDataSetChanged()
+                    openFile(newFile)
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun deleteFile(file: File) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete")
+            .setMessage("Delete ${file.name}?")
+            .setPositiveButton("Delete") { _, _ ->
+                file.delete()
+                loadFiles()
+                adapter.notifyDataSetChanged()
+                if (fileNames.isNotEmpty()) {
+                    openFile(File(projectDir, fileNames[0]))
+                } else {
+                    editor.setText("")
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
     private fun defaultHtml(): String {
         return """
             <html>
             <body>
                 <h1>WebCoderPro 🚀</h1>
-                <p>Multiple file project</p>
+                <p>Edit multiple files</p>
             </body>
             </html>
         """.trimIndent()
