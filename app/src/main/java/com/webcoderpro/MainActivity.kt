@@ -1,7 +1,7 @@
 import android.app.AlertDialog
 import android.widget.ArrayAdapter
 import java.io.File
-importt android.graphics.Color
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.webkit.WebView
