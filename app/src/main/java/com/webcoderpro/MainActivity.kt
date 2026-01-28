@@ -22,7 +22,60 @@ private fun loadFiles() {
         fileNames.add(it.name)
     }
 }
+private fun showFileOptions(file: File) {
+    val options = arrayOf("Rename", "Delete")
 
+    AlertDialog.Builder(this)
+        .setTitle(file.name)
+        .setItems(options) { _, which ->
+            when (which) {
+                0 -> renameFileDialog(file)
+                1 -> deleteFile(file)
+            }
+        }
+        .show()
+}
+private fun renameFileDialog(file: File) {
+    val input = EditText(this)
+    input.setText(file.name)
+
+    AlertDialog.Builder(this)
+        .setTitle("Rename File")
+        .setView(input)
+        .setPositiveButton("Rename") { _, _ ->
+            val newName = input.text.toString()
+            if (newName.isNotEmpty()) {
+                val newFile = File(filesDirPath, newName)
+                file.renameTo(newFile)
+                loadFiles()
+                fileAdapter.notifyDataSetChanged()
+
+                if (currentFile == file) {
+                    currentFile = newFile
+                    htmlEditor.setText(newFile.readText())
+                }
+            }
+        }
+        .setNegativeButton("Cancel", null)
+        .show()
+}
+private fun deleteFile(file: File) {
+    AlertDialog.Builder(this)
+        .setTitle("Delete File")
+        .setMessage("Are you sure?")
+        .setPositiveButton("Delete") { _, _ ->
+            file.delete()
+            loadFiles()
+            fileAdapter.notifyDataSetChanged()
+
+            if (currentFile == file) {
+                currentFile = null
+                htmlEditor.setText("")
+            }
+        }
+        .setNegativeButton("Cancel", null)
+        .show()
+}
 private fun createNewFileDialog() {
     val input = EditText(this)
     input.hint = "index.html"
@@ -63,7 +116,11 @@ fileList.setOnItemClickListener { _, _, position, _ ->
     currentFile = file
     htmlEditor.setText(file.readText())
 }
-
+fileList.setOnItemLongClickListener { _, _, position, _ ->
+    val selectedFile = File(filesDirPath, fileNames[position])
+    showFileOptions(selectedFile)
+    true
+}
 newFileBtn.setOnClickListener {
     createNewFileDialog()
 }
