@@ -8,6 +8,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -29,6 +30,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
         // Views
         htmlEditor = findViewById(R.id.htmlEditor)
         webView = findViewById(R.id.webView)
@@ -43,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = WebViewClient()
 
-        // File system
+        // Files
         filesDirPath = File(filesDir, "projects")
         if (!filesDirPath.exists()) filesDirPath.mkdir()
 
@@ -51,17 +56,15 @@ class MainActivity : AppCompatActivity() {
         fileAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, fileNames)
         fileList.adapter = fileAdapter
 
-        // Default HTML
         htmlEditor.setText("""
             <html>
             <body>
                 <h1>WebCoderPro 🚀</h1>
-                <button onclick="alert('JS Working')">Click</button>
+                <button onclick="alert('JS Works')">Test JS</button>
             </body>
             </html>
         """.trimIndent())
 
-        // Tabs
         editorTab.setOnClickListener {
             htmlEditor.visibility = View.VISIBLE
             webView.visibility = View.GONE
@@ -80,18 +83,15 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        // Dark mode
         darkBtn.setOnClickListener {
             isDark = !isDark
-            applyTheme(isDark)
+            applyTheme()
         }
 
-        // Export ZIP
         exportBtn.setOnClickListener {
             exportProjectAsZip()
         }
 
-        // File list click
         fileList.setOnItemClickListener { _, _, position, _ ->
             val file = File(filesDirPath, fileNames[position])
             currentFile = file
@@ -181,8 +181,8 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "ZIP Created", Toast.LENGTH_SHORT).show()
     }
 
-    private fun applyTheme(dark: Boolean) {
-        if (dark) {
+    private fun applyTheme() {
+        if (isDark) {
             htmlEditor.setBackgroundColor(Color.parseColor("#121212"))
             htmlEditor.setTextColor(Color.WHITE)
         } else {
