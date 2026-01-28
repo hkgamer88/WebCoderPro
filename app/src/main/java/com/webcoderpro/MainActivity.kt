@@ -9,6 +9,10 @@ import android.webkit.WebViewClient
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 class MainActivity : AppCompatActivity() {
 
@@ -76,12 +80,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         fileList.setOnItemLongClickListener { _, _, pos, _ ->
-            val file = File(projectDir, fileNames[pos])
-            showFileOptions(file)
+            showFileOptions(File(projectDir, fileNames[pos]))
             true
         }
 
-        // Long press editor → toggle dark mode
         editor.setOnLongClickListener {
             isDark = !isDark
             applyEditorTheme()
@@ -92,34 +94,23 @@ class MainActivity : AppCompatActivity() {
         applyEditorTheme()
     }
 
-    private fun applyEditorTheme() {
-        if (isDark) {
-            editor.setBackgroundColor(Color.parseColor("#121212"))
-            editor.setTextColor(Color.WHITE)
-            editor.setHintTextColor(Color.LTGRAY)
-        } else {
-            editor.setBackgroundColor(Color.WHITE)
-            editor.setTextColor(Color.BLACK)
-            editor.setHintTextColor(Color.DKGRAY)
+    // ================= ZIP EXPORT =================
+
+    private fun exportProjectAsZip() {
+        val zipFile = File(filesDir, "WebCoderPro_Project.zip")
+        val zipOut = ZipOutputStream(FileOutputStream(zipFile))
+
+        projectDir.listFiles()?.forEach {
+            zipOut.putNextEntry(ZipEntry(it.name))
+            FileInputStream(it).copyTo(zipOut)
+            zipOut.closeEntry()
         }
+
+        zipOut.close()
+        Toast.makeText(this, "ZIP saved: ${zipFile.name}", Toast.LENGTH_LONG).show()
     }
 
-    private fun wrapWithTheme(html: String): String {
-        val bg = if (isDark) "#121212" else "#FFFFFF"
-        val fg = if (isDark) "#FFFFFF" else "#000000"
-        return """
-            <html>
-            <head>
-                <style>
-                    body { background:$bg; color:$fg; padding:16px; }
-                </style>
-            </head>
-            <body>
-                $html
-            </body>
-            </html>
-        """.trimIndent()
-    }
+    // ================= FILE SYSTEM =================
 
     private fun loadFiles() {
         fileNames.clear()
@@ -151,28 +142,24 @@ class MainActivity : AppCompatActivity() {
             .setTitle("New HTML File")
             .setView(input)
             .setPositiveButton("Create") { _, _ ->
-                val name = input.text.toString()
-                if (name.isNotEmpty()) {
-                    val f = File(projectDir, name)
-                    f.writeText(defaultHtml())
-                    fileNames.add(f.name)
-                    adapter.notifyDataSetChanged()
-                    openFile(f)
-                }
+                val f = File(projectDir, input.text.toString())
+                f.writeText(defaultHtml())
+                fileNames.add(f.name)
+                adapter.notifyDataSetChanged()
+                openFile(f)
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
 
     private fun showFileOptions(file: File) {
-        val options = arrayOf("Rename", "Delete")
-
         AlertDialog.Builder(this)
             .setTitle(file.name)
-            .setItems(options) { _, which ->
+            .setItems(arrayOf("Rename", "Delete", "Export ZIP")) { _, which ->
                 when (which) {
                     0 -> renameFileDialog(file)
                     1 -> deleteFile(file)
+                    2 -> exportProjectAsZip()
                 }
             }
             .show()
@@ -207,10 +194,41 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // ================= THEME =================
+
+    private fun applyEditorTheme() {
+        if (isDark) {
+            editor.setBackgroundColor(Color.parseColor("#121212"))
+            editor.setTextColor(Color.WHITE)
+            editor.setHintTextColor(Color.LTGRAY)
+        } else {
+            editor.setBackgroundColor(Color.WHITE)
+            editor.setTextColor(Color.BLACK)
+            editor.setHintTextColor(Color.DKGRAY)
+        }
+    }
+
+    private fun wrapWithTheme(html: String): String {
+        val bg = if (isDark) "#121212" else "#FFFFFF"
+        val fg = if (isDark) "#FFFFFF" else "#000000"
+        return """
+            <html>
+            <head>
+                <style>
+                    body { background:$bg; color:$fg; padding:16px; }
+                </style>
+            </head>
+            <body>
+                $html
+            </body>
+            </html>
+        """.trimIndent()
+    }
+
     private fun defaultHtml(): String {
         return """
             <h1>WebCoderPro 🚀</h1>
-            <p>Dark mode ready</p>
+            <p>Export project as ZIP</p>
         """.trimIndent()
     }
 }
