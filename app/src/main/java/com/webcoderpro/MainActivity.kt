@@ -1,3 +1,8 @@
+import android.widget.Toast
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import android.app.AlertDialog
 import android.widget.ArrayAdapter
 import java.io.File
@@ -97,8 +102,40 @@ private fun createNewFileDialog() {
         .setNegativeButton("Cancel", null)
         .show()
 }
+private fun exportProjectAsZip() {
+    val zipFile = File(filesDir, "WebCoderPro_Project.zip")
+
+    try {
+        val zipOut = ZipOutputStream(FileOutputStream(zipFile))
+
+        filesDirPath.listFiles()?.forEach { file ->
+            val entry = ZipEntry(file.name)
+            zipOut.putNextEntry(entry)
+
+            val fis = FileInputStream(file)
+            fis.copyTo(zipOut)
+            fis.close()
+            zipOut.closeEntry()
+        }
+
+        zipOut.close()
+
+        Toast.makeText(
+            this,
+            "ZIP created: ${zipFile.absolutePath}",
+            Toast.LENGTH_LONG
+        ).show()
+
+    } catch (e: Exception) {
+        Toast.makeText(this, "Export failed", Toast.LENGTH_SHORT).show()
+    }
+}
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceStateval exportBtn = findViewById<Button>(R.id.btnExport)
+
+exportBtn.setOnClickListener {
+    exportProjectAsZip()
+})
         setContentView(R.layout.activity_main)
 filesDirPath = File(filesDir, "projects")
 if (!filesDirPath.exists()) filesDirPath.mkdir()
@@ -127,7 +164,7 @@ newFileBtn.setOnClickListener {
         val editorTab = findViewById<Button>(R.id.tabEditor)
         val previewTab = findViewById<Button>(R.id.tabPreview)
         val darkBtn = findViewById<Button>(R.id.btnDark)
-        val htmlEditor = findViewById<EditText>(R.id.htmlEditor)
+        val savedInstanceStatenceStatenceState = findViewById<EditText>(R.id.htmlEditor)
         val webView = findViewById<WebView>(R.id.webView)
 
         webView.settings.javaScriptEnabled = true
